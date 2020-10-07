@@ -64,9 +64,21 @@ class ViewController: UIViewController {
     }()
     
     lazy var listMenu : MainMenuView = {
-        let theView = MainMenuView(frame: CGRect(x:self.view.frame.width - 25, y:60, width:0, height: 0))
+        //let theView = MainMenuView(frame: CGRect(x:self.view.frame.width - 25, y:60, width:0, height: 0))
+        let theView = MainMenuView()
+        theView.translatesAutoresizingMaskIntoConstraints = false
         theView.menuDelegate = self
+        theView.isHidden = true
         self.view.addSubview(theView)
+        
+        NSLayoutConstraint.activate([
+            theView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            theView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            theView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+            theView.rightAnchor.constraint(equalTo: self.view.rightAnchor)
+        
+        ])
+        
         return theView
     }()
     
@@ -85,7 +97,8 @@ class ViewController: UIViewController {
             items.append("Item \(i)")
         }
         
-        self.listMenu.setup(items: items)
+        let frame = CGRect(x:self.view.frame.width - 25, y:60, width: 0, height: 0)
+        self.listMenu.setup(items: items, menuStartRect: frame)
         
         let _ = self.menuButton
         let _ = self.popMenuButton
@@ -95,28 +108,37 @@ class ViewController: UIViewController {
 
     @objc func menuAction(){
         
+        var frame = CGRect.zero
         if menuShow{
-            let frame = CGRect(x:self.view.frame.width - 25, y:60, width: 0, height: 0)
-            UIView.animate(withDuration: 0.5) {
-                self.listMenu.frame = frame
-                self.listMenu.layoutSubviews()
-            }
-            
+            self.listMenu.isHidden = true
+            frame = CGRect(x:self.view.frame.width - 25, y:60, width: 0, height: 0)
+           
         }else{
-            let frame = CGRect(x:self.view.frame.width - 25 - 150, y:60, width: 150, height: 300)
-            UIView.animate(withDuration: 0.5) {
-                self.listMenu.frame = frame
-                self.listMenu.layoutSubviews()
-            }
+            self.listMenu.isHidden = false
+            frame = CGRect(x:self.view.frame.width - 25 - 150, y:60, width: 150, height: 300)
+            
             self.view.bringSubviewToFront(self.listMenu)
         }
         
+        
+        
+        /*
+        UIView.animate(withDuration: 0.5) {
+            self.listMenu.frame = frame
+            self.listMenu.layoutSubviews()
+        }
+        */
+        
         menuShow = !menuShow
+        
+        self.listMenu.show(flag: menuShow, frame: frame)
     }
     
     @objc func popMenuAction(){
         
         let vc = MainMenuViewController()
+        vc.menuDelegate = self
+        
         for i in 0...5{
             vc.itemArray.append("item \(i)")
         }
@@ -140,6 +162,14 @@ class ViewController: UIViewController {
         self.present(vc, animated: true, completion: nil)
     }
 
+    
+    func showMessage(title: String, message: String){
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alert.addAction(okAction)
+        self.present(alert, animated: true, completion: nil)
+    }
 }
 
 extension ViewController: UIPopoverPresentationControllerDelegate{
@@ -158,7 +188,17 @@ extension ViewController: UIPopoverPresentationControllerDelegate{
 extension ViewController: MainMenuViewDelegate{
     func didSelectMenuItem(idx: Int) {
         self.menuAction()
+        
+        showMessage(title: "Select menu list item \(idx) ", message: "")
     }
     
-    
+    func didTapTheView(){
+        self.menuAction()
+    }
+}
+
+extension ViewController: MainMenuViewControllerDelegate{
+    func didSelectPopMenuItem(idx: Int) {
+        showMessage(title: "Select popup menu item \(idx) ", message: "")
+    }
 }

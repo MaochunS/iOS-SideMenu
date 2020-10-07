@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol MainMenuViewControllerDelegate {
+    func didSelectPopMenuItem(idx: Int)
+}
+
 class MainMenuViewController: UIViewController {
     
     var itemArray = [String]()
@@ -44,6 +48,8 @@ class MainMenuViewController: UIViewController {
         
         return tableView
     }()
+    
+    var menuDelegate : MainMenuViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,6 +95,7 @@ extension MainMenuViewController: UITableViewDelegate, UITableViewDataSource {
         self.selItemTxt = cell?.textLabel?.text ?? ""
         
         self.dismiss(animated: true, completion: nil)
+        self.menuDelegate?.didSelectPopMenuItem(idx: indexPath.row)
         //self.popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(popoverPresentationController!)
     }
         

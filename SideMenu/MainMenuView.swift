@@ -10,10 +10,12 @@ import UIKit
 
 protocol MainMenuViewDelegate {
     func didSelectMenuItem(idx: Int)
+    func didTapTheView()
 }
 
 
 class MainMenuView: UIView {
+    
     
     lazy var listTableView: UITableView = {
         
@@ -22,7 +24,7 @@ class MainMenuView: UIView {
         
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        //tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.estimatedRowHeight = 40
         tableView.rowHeight = UITableView.automaticDimension
         //tableView.borderWidth = 1.0
@@ -48,7 +50,7 @@ class MainMenuView: UIView {
         self.addSubview(tableView)
         
         
-        
+        /*
         NSLayoutConstraint.activate([
             
             tableView.topAnchor.constraint(equalTo: self.topAnchor, constant: 0),
@@ -57,7 +59,7 @@ class MainMenuView: UIView {
             tableView.rightAnchor.constraint(equalTo: self.rightAnchor)
             
         ])
-        
+        */
         
         
         return tableView
@@ -70,17 +72,31 @@ class MainMenuView: UIView {
     
     var menuDelegate:MainMenuViewDelegate?
     
-    func setup(items: [String]){
+    func setup(items: [String], menuStartRect:CGRect){
         self.items.append(contentsOf: items)
+        self.listTableView.frame = menuStartRect
         self.listTableView.reloadData()
     }
 
-   
+    func show(flag:Bool, frame: CGRect){
+        UIView.animate(withDuration: 0.5) {
+            self.listTableView.frame = frame
+        }
+    }
+    
+    @objc func onTapped(){
+        self.menuDelegate?.didTapTheView()
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
             
-        self.backgroundColor = .gray
+        self.backgroundColor = UIColor.init(red: 0, green: 0, blue: 0, alpha: 0.7)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(onTapped))
+        tap.delegate = self
+        tap.cancelsTouchesInView = false
+        self.addGestureRecognizer(tap)
     }
         
     required init?(coder aDecoder: NSCoder) {
@@ -93,7 +109,6 @@ class MainMenuView: UIView {
 extension MainMenuView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         
         return items.count
     }
@@ -144,5 +159,21 @@ extension MainMenuView: UITableViewDelegate, UITableViewDataSource {
         tableView.cellForRow(at: idx)?.backgroundColor = .white
         
         return indexPath
+    }
+}
+
+
+extension MainMenuView: UIGestureRecognizerDelegate {
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var view = touch.view
+        while view != nil {
+            if view is UITableView {
+                return false
+            } else {
+                view = view!.superview
+            }
+        }
+        return true
     }
 }
