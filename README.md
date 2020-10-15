@@ -1,6 +1,6 @@
-# iOS-ExpandableTableviewSection
+# iOS-SideMenu
 
-Expandable tableview section with reorderable cells.
+Different popup menus
 
 
 <img src="demo.gif" width="320" height="569"/>
